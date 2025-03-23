@@ -19,6 +19,7 @@ from aiogram import Bot, executor
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.types import ParseMode
 from collections import defaultdict
+from googletrans import Translator
 
 API_TOKEN = '7936986251:AAG-lHYz8CRd5yRGYWskdqMZ5dmtO_Rqowk'
 API_KEY = 'AIzaSyDdIv6Lsjmgo9y1d1_yj-YpWRT6CgNA5xU'
@@ -39,6 +40,8 @@ genres = {
     "История": "history",
     "Поиск по всем жанрам": "all"
 }
+translator = Translator()
+
 
 # Создаем клавиатуру с жанрами
 genre_buttons = [KeyboardButton(genre) for genre in genres.keys()]
@@ -76,8 +79,13 @@ async def private_message_warning(message: types.Message):
 async def search_book(message: types.Message, state: FSMContext):
     global search_active
     if search_active:
+        # Переводим текст запроса на английский
         query = message.text
-        await state.update_data(search_query=query)  # Сохраняем запрос
+        if any('\u0400' <= c <= '\u04FF' for c in query):  # Проверка на наличие кириллических символов
+            translated = translator.translate(query, src='ru', dest='en')
+            query = translated.text
+            
+        await state.update_data(search_query=query)  # Сохраняем очередь
         await SearchState.waiting_for_genre.set()  # Переходим к выбору жанра
         await message.answer("Выберите жанр книги:", reply_markup=genres_kb)
 

@@ -1,0 +1,173 @@
+# @dp.message_handler(state=SearchState.waiting_for_genre)
+# async def select_genre(message: types.Message, state: FSMContext):
+#     if message.text in genres.keys():
+#         user_data = await state.get_data()  # Получаем сохраненные данные
+#         query = user_data.get('search_query')  # Извлекаем запрос
+#         genre = genres[message.text]
+        
+#         if genre == "all":
+#             url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={API_KEY}'
+#         else:
+#             url = f'https://www.googleapis.com/books/v1/volumes?q={query}+subject:{genre}&key={API_KEY}'
+
+#         # Здесь вы можете добавить логику для получения и отправки результатов пользователю
+#         await message.answer(f"Ищу книги по запросу: {query}, жанр: {message.text}")
+        
+#         # После завершения работы можно сбросить состояние
+#         await state.finish()  
+#         global search_active
+#         search_active = False
+
+# @dp.message_handler(state=SearchState.waiting_for_genre)
+# async def select_genre(message: types.Message, state: FSMContext):
+#     if message.text in genres.keys():
+#         user_data = await state.get_data()  # Получаем сохраненные данные
+#         query = user_data.get('search_query')  # Извлекаем запрос
+#         genre = genres[message.text]
+        
+#         if genre == "all":
+#             url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={API_KEY}'
+#         else:
+#             url = f'https://www.googleapis.com/books/v1/volumes?q={query}+subject:{genre}&key={API_KEY}'
+
+#                 # Здесь вы можете добавить логику для получения и отправки результатов пользователю
+#         # await message.answer(f"Ищу книги по запросу:\n<b>Название:<b> {query}, \n<b>Жанр:<b> {message.text}", reply_markup=ReplyKeyboardRemove(), parse_mode="HTML")
+#         await message.answer(
+
+#         f"Ищу книги по запросу:\n<b>Название:</b> {query}, \n<b>Жанр:</b> {message.text}",
+
+#         reply_markup=ReplyKeyboardRemove(),
+
+#         parse_mode="HTML"
+
+#         )
+
+
+
+#         response = requests.get(url)
+#         data = response.json()
+        
+#         if data.get('items'):
+#             books = data['items']
+            
+#             for book in books[:5]:  # Ограничим результат до 5 книг
+                
+#                 title = book['volumeInfo'].get('title', 'Без названия')
+#                 authors = ', '.join(book['volumeInfo'].get('authors', ['Неизвестный автор']))
+#                 published_date = book['volumeInfo'].get('publishedDate', 'Дата публикации неизвестна')
+#                 thumbnail = book['volumeInfo'].get('imageLinks', {}).get('thumbnail', None)
+#                 pdf_link = book['accessInfo'].get('pdf', {}).get('downloadLink', 'Нет PDF версии')
+#                 link = book['volumeInfo'].get('previewLink', 'Нет ссылки')
+                
+#                 linked = str(link)
+
+
+#                 response_text = f"<b>Название:</b> {title}\n"
+
+#                 response_text += f"<b>Авторы:</b> {authors}\n"
+
+#                 response_text += f"<b>Дата публикации:</b> {published_date}\n"
+
+#                 response_text += f'<a href="{link}">Читать в Google Books</a>\n'
+
+#                 response_text += f'<a href="{pdf_link}">Скачать PDF</a>\n' if pdf_link != 'Нет PDF версии' else "PDF версия не доступна для скачивания."
+
+
+#                 if thumbnail:
+#                     await message.answer_photo(photo=thumbnail, caption=response_text, parse_mode='HTML', 
+#                                                #disable_web_page_preview=True
+#                                                )
+#                 else:
+#                     # await message.answer(response_text, parse_mode='Markdown', disable_web_page_preview=True)
+#                     await message.answer(response_text, parse_mode='HTML', disable_web_page_preview=True)
+                    
+#         else:
+#             await message.answer("Книги не найдены. Попробуйте ввести другой запрос.")
+        
+#         await state.finish()  # Завершаем состояние после обработки
+#     else:
+#         await message.answer("Пожалуйста, выберите жанр из списка.", reply_markup=genres_kb)
+
+# if __name__ == '__main__':
+#     executor.start_polling(dp, skip_updates=True)
+
+
+# 2222
+# Настройте состояния
+# class BookState(StatesGroup):
+#     waiting_for_genre = State()
+#     waiting_for_next = State()
+
+# # Начальные параметры
+# GENRE_LIMIT = 5  # Количество книг на странице
+# books_data = {}  # Словарь для хранения книг для пользователя
+
+# @dp.message_handler(state=SearchState.waiting_for_genre)
+# async def select_genre(message: types.Message, state: FSMContext):
+#     if message.text in genres.keys():
+#         user_data = await state.get_data()  
+#         query = user_data.get('search_query')  
+#         genre = genres[message.text]
+        
+#         if genre == "all":
+#             url = f'https://www.googleapis.com/books/v1/volumes?q={query}&key={API_KEY}'
+#         else:
+#             url = f'https://www.googleapis.com/books/v1/volumes?q={query}+subject:{genre}&key={API_KEY}'
+        
+#         response = requests.get(url)
+#         data = response.json()
+        
+#         if data.get('items'):
+#             books = data['items']
+#             books_data[message.from_user.id] = books  # Сохраняем книги в словаре
+#             await send_books(message.chat.id, books[:GENRE_LIMIT], 0)
+#         else:
+#             await message.answer("Книги не найдены. Попробуйте ввести другой запрос.")
+        
+#         await state.finish()  
+#     else:
+#         await message.answer("Пожалуйста, выберите жанр из списка.", reply_markup=genres_kb)
+
+# async def send_books(chat_id, books, start_index):
+#     for book in books:
+#         title = book['volumeInfo'].get('title', 'Без названия')
+#         authors = ', '.join(book['volumeInfo'].get('authors', ['Неизвестный автор']))
+#         published_date = book['volumeInfo'].get('publishedDate', 'Дата публикации неизвестна')
+#         thumbnail = book['volumeInfo'].get('imageLinks', {}).get('thumbnail', None)
+#         link = book['volumeInfo'].get('previewLink', 'Нет ссылки')
+        
+#         response_text = f"<b>Название:</b> {title}\n"
+#         response_text += f"<b>Авторы:</b> {authors}\n"
+#         response_text += f"<b>Дата публикации:</b> {published_date}\n"
+#         response_text += f'<a href="{link}">Читать в Google Books</a>\n'
+        
+#         if thumbnail:
+#             await bot.send_photo(chat_id, photo=thumbnail, caption=response_text, parse_mode='HTML')
+#         else:
+#             await bot.send_message(chat_id, response_text, parse_mode='HTML')
+
+#     # Кнопка для получения следующих книг
+#     if start_index + GENRE_LIMIT < len(books_data[chat_id]):
+#         await bot.send_message(chat_id, "Нажмите ниже для загрузки следующих книг.",
+#                            reply_markup=types.InlineKeyboardMarkup().add(
+#                                    types.InlineKeyboardButton("Следующие книги", callback_data="next_books")
+#                                ))
+
+# @dp.callback_query_handler(lambda c: c.data.startswith('next_books_'))
+# async def next_books(callback_query: types.CallbackQuery):
+#     user_id = callback_query.from_user.id
+#     books = books_data.get(user_id, [])
+    
+#     if not books:
+#         await bot.answer_callback_query(callback_query.id, text="Список книг пуст.")
+#         return
+
+#     start_index = (callback_query.data.get('index', 0)) + GENRE_LIMIT
+
+#     if start_index < len(books):
+#         await send_books(callback_query.message.chat.id, books[start_index:start_index + GENRE_LIMIT], start_index)
+#     else:
+#         await bot.answer_callback_query(callback_query.id, text="Больше книг нет.")
+
+# if __name__ == '__main__':
+#     executor.start_polling(dp, skip_updates=True)
