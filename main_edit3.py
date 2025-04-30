@@ -20,6 +20,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 from aiogram.types import ParseMode
 from collections import defaultdict
 from googletrans import Translator
+from aiogram.types import InputFile
+
 
 API_TOKEN = '7936986251:AAG-lHYz8CRd5yRGYWskdqMZ5dmtO_Rqowk'
 API_KEY = 'AIzaSyDdIv6Lsjmgo9y1d1_yj-YpWRT6CgNA5xU'
@@ -52,17 +54,35 @@ class SearchState(StatesGroup):
     waiting_for_query = State()
     waiting_for_genre = State()
 
+# @dp.message_handler(commands=['start'])
+# async def cmd_start(message: types.Message):
+#     await message.reply("Привет, я бот для поиска книг на английском, который поможет вам изучить английский язык на 200%!. \n<b>Для поиска книг введите</b> /search", parse_mode='HTML')
+
+# @dp.message_handler(commands=['help'])
+# async def cmd_help(message: types.Message):
+#     await message.reply("/start - Запустить бота\n/help - Показать вспомогательное сообщение\n/search - Искать книги\n/about - Показать информацию о проекте и разработчииках\n:3", parse_mode='HTML')
+
+# @dp.message_handler(commands=['about'])
+# async def cmd_about(message: types.Message):
+#     await message.reply("Этот проект является <b>полноценным телеграм-ботом</b>, который поможет вам <b>изучить английский с помощью приятного досуга в виде чтения книг</b>, позволяющий находить и читать книги с комфортом, с любого устройства, а главное - все это <b>совершенно бесплатно!</b>", parse_mode='HTML')
+
+
+
 @dp.message_handler(commands=['start'])
 async def cmd_start(message: types.Message):
-    await message.reply("Привет, я бот для поиска книг на английском, который поможет вам изучить английский язык на 200%!. \n<b>Для поиска книг введите</b> /search", parse_mode='HTML')
+    photo = InputFile('main.png')  # Укажите имя вашего изображения
+    await message.reply_photo(photo=photo, caption="Привет, я бот для поиска книг на английском, который поможет вам изучить английский язык на 200%!. \n<b>Для поиска книг введите</b> /search", parse_mode='HTML')
 
 @dp.message_handler(commands=['help'])
 async def cmd_help(message: types.Message):
-    await message.reply("/start - Запустить бота\n/help - Показать вспомогательное сообщение\n/search - Искать книги\n/about - Показать информацию о проекте и разработчииках\n:3", parse_mode='HTML')
+    photo = InputFile('main.png')  # Укажите имя вашего изображения
+    await message.reply_photo(photo=photo, caption="/start - Запустить бота\n/help - Показать вспомогательное сообщение\n/search - Искать книги\n/about - Показать информацию о проекте и разработчиках\n:3", parse_mode='HTML')
 
 @dp.message_handler(commands=['about'])
 async def cmd_about(message: types.Message):
-    await message.reply("Этот проект является <b>полноценным телеграм-ботом</b>, который поможет вам <b>изучить английский с помощью приятного досуга в виде чтения книг</b>, позволяющий находить и читать книги с комфортом, с любого устройства, а главное - все это <b>совершенно бесплатно!</b>", parse_mode='HTML')
+    photo = InputFile('main.png')  # Укажите имя вашего изображения
+    await message.reply_photo(photo=photo, caption="Этот проект является <b>полноценным телеграм-ботом</b>, который поможет вам <b>изучить английский с помощью приятного досуга в виде чтения книг</b>, позволяющий находить и читать книги с комфортом, с любого устройства, а главное - все это <b>совершенно бесплатно!</b>", parse_mode='HTML')
+
 
 @dp.message_handler(commands=['search'])
 async def search_command(message: types.Message):
