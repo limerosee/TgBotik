@@ -45,7 +45,6 @@ genres = {
 }
 translator = Translator()
 
-
 # Создаем клавиатуру с жанрами
 genre_buttons = [KeyboardButton(genre) for genre in genres.keys()]
 genres_kb = ReplyKeyboardMarkup(resize_keyboard=True).add(*genre_buttons)
@@ -55,22 +54,25 @@ class SearchState(StatesGroup):
     waiting_for_query = State()
     waiting_for_genre = State()
 
+# Создаем обработчик для команды "/start"
 @dp.message_handler(commands=['start'])
 async def cmd_start(message: types.Message):
-    photo = InputFile('main.png')  # Укажите имя вашего изображения
+    photo = InputFile('main.png')  # Укажем адресс нашего изображения
     await message.reply_photo(photo=photo, caption="Привет, я бот для поиска книг на английском, который поможет вам изучить английский язык на 200%!. \n<b>Для поиска книг введите</b> /search", parse_mode='HTML')
 
+# Создаем обработчик для команды "/help"
 @dp.message_handler(commands=['help'])
 async def cmd_help(message: types.Message):
-    photo = InputFile('main.png')  # Укажите имя вашего изображения
+    photo = InputFile('main.png')  # Укажем адресс нашего изображения
     await message.reply_photo(photo=photo, caption="/start - Запустить бота\n/help - Показать вспомогательное сообщение\n/search - Искать книги\n/about - Показать информацию о проекте и разработчиках\n:3", parse_mode='HTML')
 
+# Создаем обработчик для команды "/about"
 @dp.message_handler(commands=['about'])
 async def cmd_about(message: types.Message):
-    photo = InputFile('main.png')  # Укажите имя вашего изображения
+    photo = InputFile('main.png')  # Укажем адресс нашего изображения
     await message.reply_photo(photo=photo, caption="Этот проект является <b>полноценным телеграм-ботом</b>, который поможет вам <b>изучить английский с помощью приятного досуга в виде чтения книг</b>, позволяющий находить и читать книги с комфортом, с любого устройства, а главное - все это <b>совершенно бесплатно!</b>", parse_mode='HTML')
 
-
+# Создаем обработчик для команды "/search"
 @dp.message_handler(commands=['search'])
 async def search_command(message: types.Message):
     global search_active
@@ -78,10 +80,12 @@ async def search_command(message: types.Message):
     await SearchState.waiting_for_query.set()  # Устанавливаем состояние
     await message.answer("Введите название книги, которую хотите найти.")
 
+# Проверяем тип чата
 @dp.message_handler(lambda message: message.chat.type != 'private')
 async def private_message_warning(message: types.Message):
     await message.answer("Пожалуйста, используйте личные сообщения для поиска книг.")
 
+# Создаем функцию обработки запроса
 @dp.message_handler(state=SearchState.waiting_for_query, content_types=types.ContentTypes.TEXT)
 async def search_book(message: types.Message, state: FSMContext):
     global search_active
@@ -96,6 +100,7 @@ async def search_book(message: types.Message, state: FSMContext):
         await SearchState.waiting_for_genre.set()  # Переходим к выбору жанра
         await message.answer("Выберите жанр книги:", reply_markup=genres_kb)
 
+# Создаем функцию выбора жанра
 @dp.message_handler(state=SearchState.waiting_for_genre)
 async def select_genre(message: types.Message, state: FSMContext):
     if message.text in genres.keys():
@@ -122,6 +127,7 @@ async def select_genre(message: types.Message, state: FSMContext):
     else:
         await message.answer("Пожалуйста, выберите жанр из списка.", reply_markup=genres_kb)
 
+# Создаем функцию отправки книг
 async def send_books(chat_id, books, start_index):
     for book in books:
         title = book['volumeInfo'].get('title', 'Без названия')
@@ -146,7 +152,7 @@ async def send_books(chat_id, books, start_index):
                                reply_markup=types.InlineKeyboardMarkup().add(
                                    types.InlineKeyboardButton("Следующие книги", callback_data=f"next_books_{start_index + GENRE_LIMIT}")
                                ))
-
+# Создаем функцию для работы с нашим списком книг
 @dp.callback_query_handler(lambda c: c.data.startswith('next_books_'))
 async def next_books(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
@@ -182,7 +188,7 @@ async def restart_search(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.message.chat.id, "Пожалуйста, введите новый запрос на поиск книг.")
     books_data.pop(callback_query.from_user.id, None)  # Удаляем данные о книгах предыдущего поиска
 
-
+# Запускаем бесконечный цикл опроса нашего бота с диспетчером
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
 
