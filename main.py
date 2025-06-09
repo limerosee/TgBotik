@@ -85,7 +85,6 @@ async def search_command(message: types.Message):
 async def private_message_warning(message: types.Message):
     await message.answer("Пожалуйста, используйте личные сообщения для поиска книг.")
 
-# Создаем функцию обработки запроса
 @dp.message_handler(state=SearchState.waiting_for_query, content_types=types.ContentTypes.TEXT)
 async def search_book(message: types.Message, state: FSMContext):
     global search_active
@@ -93,7 +92,7 @@ async def search_book(message: types.Message, state: FSMContext):
         # Переводим текст запроса на английский
         query = message.text
         if any('\u0400' <= c <= '\u04FF' for c in query):  # Проверка на наличие кириллических символов
-            translated = translator.translate(query, src='ru', dest='en')
+            translated = await translator.translate(query, src='ru', dest='en')  # Добавили await здесь
             query = translated.text
             
         await state.update_data(search_query=query)  # Сохраняем очередь
